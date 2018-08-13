@@ -1,25 +1,33 @@
 import React, { Component } from 'react';
+import toastr from 'toastr';
 import axios from 'axios';
 import uuidv1 from 'uuid/v1';
+import Dropzone from 'react-dropzone';
 
+// Import styles for toastr
+import 'toastr/build/toastr.min.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-import Dropzone from 'react-dropzone';
+import LoadingIndicator from './LoadingIndicator';
 
 const SAKURA_STAGE = ['Pink bud', 'Start blooming', 'Blooming', 'Falling'];
 
 
 class App extends Component {
-  state = { files: [] }
+  state = { files: [], loading: false }
 
-  onDrop(files) {
+  onDrop = (files, rejectedFiles) => {
     this.setState({
-      files: files.map(file => {
-        file.id = uuidv1();
-        return file;
-      }
-    )});
+      files: [
+        ...this.state.files,
+        ...files.map(file => {
+          file.id = uuidv1();
+          return file;
+        }),
+      ],
+    });
+    if (rejectedFiles && rejectedFiles.length > 0) toastr.error('Unsupported file type');
   }
 
   handleSubmit = (e) => {
@@ -29,6 +37,7 @@ class App extends Component {
       this.state.files.forEach(file => {
         formData.append(file.id, file);
       });
+      this.setState({ loading: true});
       axios({
         headers: {'Content-Type': 'multipart/form-data' },
         method: 'post',
@@ -41,6 +50,10 @@ class App extends Component {
             return file;
           })});
         }
+        this.setState({ loading: false });
+      }).catch(() => {
+        toastr.error('Something went wrong. Please try again later');
+        this.setState({ loading: false });
       });
     }
   }
@@ -52,7 +65,10 @@ class App extends Component {
         <form onSubmit={this.handleSubmit}>
           <section>
             <div className="dropzone">
-              <Dropzone onDrop={this.onDrop.bind(this)}>
+              <Dropzone
+                onDrop={this.onDrop.bind(this)}
+                accept={['image/jpeg', 'image/png']}
+              >
                 <p>Try dropping some files here, or click to select files to upload.</p>
               </Dropzone>
             </div>
@@ -62,10 +78,12 @@ class App extends Component {
                 {this.state.files && this.state.files.length > 0 ?
                   this.state.files.map(f =>
                     <li key={f.name} className="mb-2 img-thumbnail">
-                      <img src={f.preview} height="100px" className="mr-2" />
-                      <span className="text-success">{f.stage !== undefined && SAKURA_STAGE[f.stage]}</span>
-                      <div className="side-info">{f.name} - {f.size} bytes</div>
-                      
+                      <img src={f.preview} height="100px" className="mr-4" />
+                      <span className="text-success">{this.state.loading ? <LoadingIndicator color="gray" /> : (f.stage !== undefined && SAKURA_STAGE[f.stage])}</span>
+                      <div className="side-info">
+                        {f.name} - {f.size} bytes
+                        <span className="delete-icon-btn">X</span>
+                      </div>
                     </li>
                   ) : (
                     <h6 className="text-center">No file uploaded</h6>
@@ -78,7 +96,7 @@ class App extends Component {
             className="btn btn-primary"
             disabled={!this.state.files || this.state.files.length < 1}
           >
-            Get Sakura stage
+            {this.state.loading ? <LoadingIndicator /> : 'Get Sakura stage'}
           </button>
         </form>
       </div>
