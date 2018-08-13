@@ -30,11 +30,17 @@ class App extends Component {
     if (rejectedFiles && rejectedFiles.length > 0) toastr.error('Unsupported file type');
   }
 
+  removeFile = (fileId) => {
+    this.setState({
+      files: this.state.files.filter(f => f.id !== fileId),
+    });
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
-    if (this.state.files && this.state.files.length > 0) {
+    if (this.state.files && this.state.files.length > 0 && this.state.files.filter(f => !f.stage).length > 0) {
       var formData = new FormData();
-      this.state.files.forEach(file => {
+      this.state.files.filter(f => !f.stage).forEach(file => {
         formData.append(file.id, file);
       });
       this.setState({ loading: true});
@@ -46,7 +52,9 @@ class App extends Component {
       }).then((res) => {
         if (res && res.data && res.data.results) {
           this.setState({ files: this.state.files.map((file) => {
-            file.stage = res.data.results[file.id];
+            if (res.data.results[file.id] !== undefined) {
+              file.stage = res.data.results[file.id];
+            }
             return file;
           })});
         }
@@ -77,12 +85,12 @@ class App extends Component {
               <ul className="file-list">
                 {this.state.files && this.state.files.length > 0 ?
                   this.state.files.map(f =>
-                    <li key={f.name} className="mb-2 img-thumbnail">
+                    <li key={f.id} className="mb-2 img-thumbnail">
                       <img src={f.preview} height="100px" className="mr-4" />
-                      <span className="text-success">{this.state.loading ? <LoadingIndicator color="gray" /> : (f.stage !== undefined && SAKURA_STAGE[f.stage])}</span>
+                      <span className="text-success">{(this.state.loading && f.stage === undefined) ? <LoadingIndicator color="gray" /> : (f.stage !== undefined && SAKURA_STAGE[f.stage])}</span>
                       <div className="side-info">
                         {f.name} - {f.size} bytes
-                        <span className="delete-icon-btn">X</span>
+                        {!this.state.loading && <span className="delete-icon-btn" onClick={() => this.removeFile(f.id)}>X</span>}
                       </div>
                     </li>
                   ) : (

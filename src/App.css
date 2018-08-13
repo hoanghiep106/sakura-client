@@ -71,6 +71,15 @@ ul li {
   animation-delay: -0.16s;
 }
 
+.delete-icon-btn {
+  color: #fff;
+  background-color: #444;
+  padding: .2rem .3rem;
+  border-radius: 10%;
+  margin-left: .5rem;
+  cursor: pointer;
+}
+
 @-webkit-keyframes sk-bouncedelay {
   0%,
   80%,
