@@ -1,0 +1,36 @@
+ul {
+  padding: 1rem;
+}
+
+ul li {
+  list-style: none;
+}
+
+.img-thumbnail {
+  padding: .5rem;
+}
+
+.App {
+  text-align: center;
+}
+
+.dropzone {
+  padding: 1rem;
+}
+
+.file-list li {
+  position: relative;
+}
+
+.side-info {
+  position: absolute;
+  right: .5rem;
+  top: .5rem;
+  font-size: .7rem;
+  color: #999;
+}
+
+.dropzone > div {
+  padding: 2rem;
+  width: 100% !important;
+}
