@@ -11,7 +11,7 @@ import './App.css';
 
 import LoadingIndicator from './LoadingIndicator';
 
-const SAKURA_STAGE = ['Pink bud', 'Start blooming', 'Blooming', 'Falling'];
+const SAKURA_STAGE = ['Beginning', 'Pink bud', 'Start blooming', 'Blooming', 'Falling', 'Leaves'];
 
 
 class App extends Component {
